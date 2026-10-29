@@ -3,7 +3,7 @@ import streamlit as st
 
 # Configuración de la página
 st.set_page_config(
-    page_title="Estación Meteorológica IOLIVA129",
+    page_title="Estación Meteorológica - IES Oliva de la Frontera",
     page_icon="⛅",
     layout="centered",
 )
