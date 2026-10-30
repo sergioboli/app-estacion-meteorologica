@@ -1,14 +1,23 @@
 import requests
 import streamlit as st
 
-# Configuración de la página
+# ==========================================
+# 1. CONFIGURACIÓN DE LA PÁGINA
+# ==========================================
+# Definimos el título de la pestaña del navegador, el icono y el diseño centrado
 st.set_page_config(
     page_title="Estación Meteorológica - IES Oliva de la Frontera",
     page_icon="⛅",
     layout="centered",
 )
 
-# Estilos visuales personalizados (fondo casi negro, tarjetas transparentes y efecto hover verde)
+# ==========================================
+# 2. ESTILOS VISUALES PERSONALIZADOS (CSS)
+# ==========================================
+# Inyectamos CSS para lograr el diseño deseado:
+# - Fondo de la app casi negro (#050505)
+# - Tarjetas con transparencia de cristal (rgba)
+# - Efecto hover dinámico (la tarjeta se eleva 8px y se ilumina en verde #00ff80)
 st.markdown(
     """
     <style>
@@ -52,32 +61,47 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.title("⛅ Estación  Meteoroligia IES OLIVA DE LA FRONTERA")
+# Título principal de la aplicación en pantalla
+st.title("⛅ Estación Meteorológia IES OLIVA DE LA FRONTERA")
 st.markdown("---")
 
-# URL de tu servidor central en Render
+# ==========================================
+# 3. CONEXIÓN CON LA API CENTRAL (BACKEND)
+# ==========================================
+# Dirección web oficial del servidor Flask desplegado en Render
 URL_API = "https://estacion-meteorologica-profe.onrender.com/api/estado"
 
 
 def obtener_datos():
+  """Función que realiza una petición HTTP GET al servidor para obtener
+
+  el diccionario JSON con los datos meteorológicos actualizados.
+  """
   try:
     response = requests.get(URL_API, timeout=5)
+    # Si la respuesta es exitosa (código 200)
     if response.status_code == 200:
       return response.json()
-  except:
+  except Exception:
     pass
   return None
 
 
+# Obtenemos los datos ejecutando la función
 datos = obtener_datos()
 
+# ==========================================
+# 4. RENDERIZADO DE DATOS E INTERFAZ
+# ==========================================
 if datos:
+  # Mostramos la fecha de la última lectura de la estación
   st.caption(f"📅 Última actualización: {datos.get('fecha', 'N/D')}")
 
-  # Distribuimos los datos en 3 columnas para aprovechar mejor la pantalla
+  # Distribuimos los datos principales en 3 columnas simétricas
   col1, col2, col3 = st.columns(3)
 
   with col1:
+    # Tarjeta de Temperatura
     st.markdown(
         f"""
         <div class="weather-card">
@@ -88,6 +112,7 @@ if datos:
         """,
         unsafe_allow_html=True,
     )
+    # Tarjeta de Viento
     st.markdown(
         f"""
         <div class="weather-card">
@@ -100,6 +125,7 @@ if datos:
     )
 
   with col2:
+    # Tarjeta de Humedad
     st.markdown(
         f"""
         <div class="weather-card">
@@ -110,6 +136,7 @@ if datos:
         """,
         unsafe_allow_html=True,
     )
+    # Tarjeta de Ráfaga de Viento
     st.markdown(
         f"""
         <div class="weather-card">
@@ -122,6 +149,7 @@ if datos:
     )
 
   with col3:
+    # Tarjeta de Lluvia
     st.markdown(
         f"""
         <div class="weather-card">
@@ -132,6 +160,7 @@ if datos:
         """,
         unsafe_allow_html=True,
     )
+    # Tarjeta de Índice UV
     st.markdown(
         f"""
         <div class="weather-card">
@@ -143,7 +172,7 @@ if datos:
         unsafe_allow_html=True,
     )
 
-  # Fila inferior para los datos restantes (Radiación solar y dirección del viento)
+  # Fila inferior en 2 columnas para los parámetros complementarios
   col_a, col_b = st.columns(2)
   with col_a:
     st.markdown(
@@ -168,10 +197,14 @@ if datos:
         unsafe_allow_html=True,
     )
 
-  # Ejemplo de lógica sencilla para clase
+  # ==========================================
+  # 5. LÓGICA EDUCATIVA Y CONDICIONALES
+  # ==========================================
+  # Ejemplo de lógica para mostrar avisos personalizados según los valores medidos
   temp = datos.get("temperatura_C", 0)
   if temp and temp > 25:
     st.warning("⚠️ ¡Aviso educativo: Temperatura superior a 25 °C!")
 
 else:
+  # Mensaje de error si la API central no responde o hay problemas de red
   st.error("⚠️ No se pudo conectar con el servidor central de Render.")
